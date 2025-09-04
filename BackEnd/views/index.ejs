@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Chatbot</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gradient-to-br from-gray-100 to-gray-300 min-h-screen flex flex-col items-center p-6">
+  <h1 class="text-4xl font-bold text-gray-800 mb-6">🤖 AI Chatbot</h1>
+
+  <div id="chatbox" class="w-full max-w-2xl bg-white shadow-xl rounded-xl p-6 mb-6 h-96 overflow-y-auto space-y-4 border">
+    <!-- Chat messages go here -->
+  </div>
+
+  <div class="flex gap-2 w-full max-w-2xl">
+    <input
+      type="text"
+      id="prompt"
+      placeholder="Ask me anything..."
+      class="flex-1 px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-400 outline-none shadow-inner"
+    />
+    <button
+      onclick="sendPrompt()"
+      class="px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-all"
+    >
+      Send
+    </button>
+  </div>
+
+  <script>
+    async function sendPrompt() {
+      const input = document.getElementById("prompt");
+      const prompt = input.value.trim();
+      if (!prompt) return;
+      appendMessage(prompt, 'user');
+      input.value = '';
+
+      try {
+        const res = await fetch('/api/ai/get-response', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ prompt }),
+        });
+        const data = await res.json();
+        appendMessage(data.text || 'No response from AI', 'bot');
+      } catch (err) {
+        appendMessage('Error: ' + err.message, 'bot');
+      }
+    }
+
+    function appendMessage(text, sender) {
+      const msgBox = document.createElement("div");
+      msgBox.className = `p-3 rounded-xl max-w-[80%] break-words ${
+        sender === 'user'
+          ? 'bg-blue-100 text-blue-900 self-end ml-auto text-right'
+          : 'bg-green-100 text-green-900 self-start mr-auto text-left'
+      }`;
+      msgBox.textContent = text;
+      document.getElementById("chatbox").appendChild(msgBox);
+    }
+  </script>
+</body>
+</html>
